@@ -1,5 +1,6 @@
-import app from "./app";
-const port = 3333;
-const msg = `Servidor rodando com sucesso em http://localhost:${port}`;
+import app from './app';
+import 'dotenv/config';
 
-app.listen(port, () => console.log(msg));
+const msg = `Servidor rodando com sucesso em http://localhost:${process.env.APP_PORT}`;
+
+app.listen(process.env.APP_PORT, () => console.log(msg));
