@@ -9,7 +9,7 @@
     "start": "nodemon src/server.js",
     "dev:debug": "nodemon --inspect src/server.js",
     "lint:fix": "yarn eslint --fix src --ext .js",
-    "create:migration": "sequelize migration:create --name=create-users",
+    "create:migration": "sequelize migration:create",
     "db:migrate": "sequelize db:migrate",
     "db:migrate:undo": "sequelize db:migrate:undo",
     "db:migrate:undo:all": "sequelize db:migrate:undo:all"
