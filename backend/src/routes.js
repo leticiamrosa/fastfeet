@@ -23,6 +23,7 @@ routes.use(authMiddleware);
 routes.put('/users', UserController.update);
 routes.post('/files', upload.single('file'), FileController.store);
 routes.post('/deliverymans', DeliverymanController.store);
+routes.put('/deliverymans/:id', DeliverymanController.update);
 
 routes.post('/recipient', RecipientController.store);
 export default routes;
