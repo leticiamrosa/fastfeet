@@ -78,7 +78,16 @@ class DeliverymanController {
     return res.json({ id, name, email });
   }
 
-  async delete(req, res) {}
+  async delete(req, res) {
+    const { id } = await Deliveryman.destroy({
+      where: { id: req.params.id },
+    });
+
+    return res.status(200).json({
+      success: 'User has been successfully deactivated',
+      id,
+    });
+  }
 }
 
 export default new DeliverymanController();
