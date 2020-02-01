@@ -19,6 +19,7 @@ class RecipientController {
     if (!(await recipientSchema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails' });
     }
+
     const {
       id,
       name,
