@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, isBefore, parseISO } from 'date-fns';
+import { isBefore, parseISO, isAfter, isWeekend, getHours } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import Recipient from '../models/Recipient';
@@ -9,6 +9,8 @@ class DeliveryController {
     const deliverySchema = Yup.object().shape({
       product: Yup.string().required(),
       start_date: Yup.date().required(),
+      deliveryman_id: Yup.number().required(),
+      recipient_id: Yup.number().required(),
     });
 
     /**
@@ -69,13 +71,32 @@ class DeliveryController {
       return res.status(400).json({ error: 'Delivery are canceled' });
     }
 
+    const now = new Date();
+    const hourStart = parseISO(start_date);
+    const hoursAvaiable = getHours(hourStart);
+
+    const avaiable = hoursAvaiable > 8 && hoursAvaiable < 18;
+
+    if (!avaiable) {
+      return res.status(403).json({
+        error: 'Hour is not available.',
+      });
+    }
+
+    /**
+     * check for weekend
+     */
+    if (isWeekend(hourStart)) {
+      return res
+        .status(403)
+        .json({ error: 'Weekends dates are not permitted.' });
+    }
+
     /**
      * check for past dates
      */
 
-    const hourStart = startOfHour(parseISO(start_date));
-
-    if (isBefore(hourStart, new Date())) {
+    if (isBefore(hourStart, now)) {
       return res.status(400).json({ error: 'Past dates are not permitted. ' });
     }
 
@@ -92,20 +113,54 @@ class DeliveryController {
     });
 
     if (checkAvailability) {
-      return res
-        .status(400)
-        .json({ error: 'Appointment date is not available' });
+      return res.status(400).json({ error: 'Date is not available' });
     }
 
-    const { signatur_id, product } = await Delivery.create(req.body);
+    /**
+     * check for signature
+     */
+
+    const { signature_id, product } = await Delivery.create(req.body);
 
     return res.json({
       recipient_id,
       deliveryman_id,
-      signatur_id,
+      signature_id,
       product,
       start_date: hourStart,
     });
+  }
+
+  async update(req, res) {
+    const deliverySchema = Yup.object().shape({
+      product: Yup.string(),
+      start_date: Yup.date(),
+      end_date: Yup.date(),
+      signature_id: Yup.string().required(),
+    });
+
+    if (!(await deliverySchema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails.' });
+    }
+
+    const delivery = Delivery.findByPk(req.params.id);
+
+    const { start_date, end_date } = req.body;
+
+    /**
+     * check end date
+     */
+    const now = new Date();
+    const hourEnd = parseISO(end_date);
+
+    if (isAfter(hourEnd, now)) {
+      return res
+        .status(400)
+        .json({ error: 'Future dates are not permitted. ' });
+    }
+
+    const { product, signature_id } = await delivery.update(req.body);
+    return res.json({ product, start_date, end_date, signature_id });
   }
 }
 
