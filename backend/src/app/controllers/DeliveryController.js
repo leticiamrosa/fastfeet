@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { isLength } from 'lodash';
+import { isLength, isNil } from 'lodash';
 import { isBefore, parseISO, isAfter, isWeekend, getHours } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
@@ -211,6 +211,28 @@ class DeliveryController {
 
     const { product, signature_id } = await delivery.update(req.body);
     return res.json({ product, start_date, end_date, signature_id });
+  }
+
+  async delete(req, res) {
+    const delivery = await Delivery.findByPk(req.params.id);
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found.' });
+    }
+
+    if (!isNil(delivery.canceled_at)) {
+      return res.status(400).json({ error: 'Delivery already canceled.' });
+    }
+
+    const { id } = delivery.update(
+      { canceled_at: new Date() },
+      { where: { id: req.params.id } }
+    );
+
+    return res.status(200).json({
+      success: 'Delivery has been successfully canceled',
+      id,
+    });
   }
 }
 
