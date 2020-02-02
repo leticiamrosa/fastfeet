@@ -1,10 +1,60 @@
 import * as Yup from 'yup';
+import { isLength } from 'lodash';
 import { isBefore, parseISO, isAfter, isWeekend, getHours } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import Recipient from '../models/Recipient';
+import File from '../models/File';
 
 class DeliveryController {
+  async index(req, res) {
+    const { page = 1, limit = 20 } = req.query;
+
+    if (
+      !isLength(Number(limit)) ||
+      !isLength(Number(page)) ||
+      limit === '' ||
+      page === ''
+    ) {
+      return res.status(405).json({ error: 'Empty pagination are not allow' });
+    }
+
+    const delivery = await Delivery.findAll({
+      attributes: ['id', 'product', 'start_date', 'end_date', 'signature_id'],
+      limit,
+      offset: (page - 1) * 20,
+      include: [
+        {
+          model: Deliveryman,
+          as: 'deliveryman',
+          attributes: ['id', 'name', 'email'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['name', 'path', 'url'],
+            },
+          ],
+        },
+        {
+          model: Recipient,
+          as: 'recipient',
+          attributes: [
+            'id',
+            'name',
+            'street',
+            'number',
+            'complement',
+            'city',
+            'state',
+            'zip_code',
+          ],
+        },
+      ],
+    });
+    return res.json(delivery);
+  }
+
   async store(req, res) {
     const deliverySchema = Yup.object().shape({
       product: Yup.string().required(),
