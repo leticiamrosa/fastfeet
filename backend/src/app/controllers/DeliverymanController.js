@@ -1,11 +1,25 @@
 import * as Yup from 'yup';
+import { isLength } from 'lodash';
 import Deliveryman from '../models/Deliveryman';
 import File from '../models/File';
 
 class DeliverymanController {
   async index(req, res) {
+    const { page = 1, limit = 20 } = req.query;
+
+    if (
+      !isLength(Number(limit)) ||
+      !isLength(Number(page)) ||
+      limit === '' ||
+      page === ''
+    ) {
+      return res.status(405).json({ error: 'Empty pagination are not allow' });
+    }
+
     const deliveryman = await Deliveryman.findAll({
       attributes: ['id', 'name', 'email', 'avatar_id'],
+      limit,
+      offset: (page - 1) * 20,
       include: [
         {
           model: File,
