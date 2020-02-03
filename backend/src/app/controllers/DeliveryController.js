@@ -193,7 +193,7 @@ class DeliveryController {
       return res.status(400).json({ error: 'Validation fails.' });
     }
 
-    const delivery = Delivery.findByPk(req.params.id);
+    const delivery = await Delivery.findByPk(req.params.id);
 
     const { start_date, end_date } = req.body;
 
