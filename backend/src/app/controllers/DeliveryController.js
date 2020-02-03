@@ -186,6 +186,7 @@ class DeliveryController {
       product: Yup.string(),
       start_date: Yup.date(),
       end_date: Yup.date(),
+      canceled_at: Yup.date(),
       signature_id: Yup.string().required(),
     });
 
@@ -209,8 +210,16 @@ class DeliveryController {
         .json({ error: 'Future dates are not permitted. ' });
     }
 
-    const { product, signature_id } = await delivery.update(req.body);
-    return res.json({ product, start_date, end_date, signature_id });
+    const { product, signature_id, canceled_at } = await delivery.update(
+      req.body
+    );
+    return res.json({
+      product,
+      start_date,
+      end_date,
+      signature_id,
+      canceled_at,
+    });
   }
 
   async delete(req, res) {
