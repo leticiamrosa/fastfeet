@@ -72,6 +72,72 @@ class RecipientController {
       zip_code,
     });
   }
+
+  async update(req, res) {
+    const recipientSchema = Yup.object().shape({
+      recipient_id: Yup.number(),
+      name: Yup.string(),
+      street: Yup.string(),
+      number: Yup.number(),
+      complement: Yup.string(),
+      city: Yup.string(),
+      state: Yup.string(),
+      zip_code: Yup.string()
+        .min(9)
+        .max(9),
+    });
+
+    if (!(await recipientSchema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+    const { recipient_id } = req.body;
+
+    const recipient = await Recipient.findByPk(recipient_id);
+
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient does not found' });
+    }
+
+    const {
+      name,
+      street,
+      number,
+      complement,
+      city,
+      state,
+      zip_code,
+    } = await recipient.update(req.body);
+
+    return res.json({
+      recipient_id,
+      name,
+      street,
+      number,
+      complement,
+      city,
+      state,
+      zip_code,
+    });
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    const recipient = await Recipient.findByPk(id);
+
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient does not found' });
+    }
+
+    await Recipient.destroy({
+      where: { id },
+    });
+
+    return res.status(200).json({
+      success: 'Recipient has been successfully deactivated',
+      id,
+    });
+  }
 }
 
 export default new RecipientController();
