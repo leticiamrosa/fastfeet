@@ -220,14 +220,9 @@ class DeliveryController {
       return res.status(400).json({ error: 'Delivery not found.' });
     }
 
-    if (!isNil(delivery.canceled_at)) {
-      return res.status(400).json({ error: 'Delivery already canceled.' });
-    }
-
-    const { id } = delivery.update(
-      { canceled_at: new Date() },
-      { where: { id: req.params.id } }
-    );
+    const { id } = await Delivery.destroy({
+      where: { id: req.params.id },
+    });
 
     return res.status(200).json({
       success: 'Delivery has been successfully canceled',

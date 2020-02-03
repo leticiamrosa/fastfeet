@@ -12,7 +12,7 @@ class Recipient extends Model {
         state: Sequelize.STRING,
         zip_code: Sequelize.STRING,
       },
-      { sequelize }
+      { sequelize, paranoid: true, deletedAt: 'deleted_at' }
     );
     return this;
   }

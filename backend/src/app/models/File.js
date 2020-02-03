@@ -13,7 +13,7 @@ class File extends Model {
           },
         },
       },
-      { sequelize }
+      { sequelize, paranoid: true, deletedAt: 'deleted_at' }
     );
 
     return this;

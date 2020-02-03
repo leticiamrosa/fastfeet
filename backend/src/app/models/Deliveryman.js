@@ -7,7 +7,7 @@ class Deliveryman extends Model {
         name: Sequelize.STRING,
         email: Sequelize.STRING,
       },
-      { sequelize }
+      { sequelize, paranoid: true, deletedAt: 'deleted_at' }
     );
     return this;
   }

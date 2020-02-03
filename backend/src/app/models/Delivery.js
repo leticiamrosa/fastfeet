@@ -9,7 +9,7 @@ class Delivery extends Model {
         end_date: Sequelize.DATE,
         canceled_at: Sequelize.DATE,
       },
-      { sequelize }
+      { sequelize, paranoid: true, deletedAt: 'deleted_at' }
     );
     return this;
   }
